@@ -3,37 +3,184 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+
+    android:id="@+id/chapter"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Chapter1Activity">
+
+    android:background="@drawable/bg_main"
+
+    tools:context=".ChapterDefaultActivity">
 
     <TextView
-        android:id="@+id/textView"
-        style="@style/Widget.AppCompat.TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:text="@string/chapter"
-        android:textSize="24pt"
+        android:id="@+id/balanceTextView"
+
+        android:layout_width="130dp"
+        android:layout_height="29dp"
+
+        android:background="@drawable/stl_transparent_10"
+
+        android:textColor="@color/white"
+        android:textSize="7pt"
+        android:gravity="center_horizontal|center_vertical"
+        android:fontFamily="serif"
+
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.15"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.06" />
+
+    <TextView
+        android:id="@+id/userLevelTextView"
+
+        android:layout_width="130dp"
+        android:layout_height="29dp"
+
+        android:background="@drawable/stl_transparent_10"
+
+        android:textColor="@color/white"
+        android:textSize="7pt"
+        android:gravity="center_horizontal|center_vertical"
+        android:fontFamily="serif"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.85"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.06" />
+
+    <ImageButton
+        android:id="@+id/buttonSelection"
+
+        android:layout_width="33dp"
+        android:layout_height="33dp"
+
+        android:background="@drawable/ic_selection"
+        android:contentDescription="@string/selection"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.058"
+
+        android:onClick="showSelectionWindow"
+
+        tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+    <ToggleButton
+        android:id="@+id/toggleLoanButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/ic_loan_filter"
+        android:checked="false"
+        android:fontFamily="serif"
+        android:textOff="@string/loan_off"
+        android:textOn="@string/loan_on"
+        android:textSize="6pt"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.12"
+        tools:ignore="TouchTargetSizeCheck,TextSizeCheck" />
+
+    <RelativeLayout
+        android:id="@+id/selectionWindowRelative"
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        android:background="#95FFFFFF"
+        android:visibility="gone"
+        android:elevation="10dp">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/selectionCardView"
+            android:layout_width="200dp"
+            android:layout_height="400dp"
+
+            android:layout_centerInParent="true"
+
+            android:background="@color/black"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:id="@+id/settingsWindowRelative"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <Button
+                    android:id="@+id/buttonSelection1"
+                    android:text="@string/light_selection"
+
+                    android:layout_width="150dp"
+                    android:layout_height="22dp"
+
+                    android:layout_marginTop="20dp"
+
+                    android:fontFamily="serif"
+                    android:background="@drawable/btn_default"
+                    android:onClick="selection1" />
+
+                <Button
+                    android:id="@+id/buttonSelection2"
+                    android:text="@string/mid_selection"
+
+                    android:layout_width="150dp"
+                    android:layout_height="22dp"
+
+                    android:layout_marginTop="20dp"
+
+                    android:fontFamily="serif"
+                    android:background="@drawable/btn_default"
+                    android:onClick="selection2" />
+
+                <Button
+                    android:id="@+id/buttonSelection3"
+                    android:text="@string/hard_selection"
+
+                    android:layout_width="150dp"
+                    android:layout_height="22dp"
+
+                    android:layout_marginTop="20dp"
+
+                    android:fontFamily="serif"
+                    android:background="@drawable/btn_default"
+                    android:onClick="selection3" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="400dp"
         android:gravity="center_horizontal"
         android:orientation="horizontal"
-        android:layout_marginTop="300dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp">
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.6">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerview"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"/>
     </LinearLayout>
 
     <LinearLayout
@@ -60,13 +207,18 @@
 
     <LinearLayout
         android:id="@+id/linearLayoutLow"
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="80dp"
+
         android:gravity="center"
         android:orientation="vertical"
+
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.9">
 
         <!-- Первая строка кнопок -->
         <LinearLayout
@@ -79,93 +231,93 @@
 
             <Button
                 android:id="@+id/button1"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="A"
-                tools:ignore="HardcodedText" />
+                tools:ignore="HardcodedText,VisualLintBounds" />
 
             <Button
                 android:id="@+id/button2"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="B"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button3"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="C"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button4"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="D"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button5"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="E"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button6"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="F"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button7"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="Q"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button8"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="V"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button9"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="G"
-                tools:ignore="HardcodedText" />
+                tools:ignore="HardcodedText,VisualLintBounds" />
 
         </LinearLayout>
 
@@ -180,83 +332,83 @@
 
             <Button
                 android:id="@+id/button10"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="H"
-                tools:ignore="HardcodedText" />
+                tools:ignore="HardcodedText,TouchTargetSizeCheck,VisualLintBounds" />
 
             <Button
                 android:id="@+id/button11"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="I"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button12"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="J"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button13"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="K"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button14"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="L"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button15"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="M"
                 tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/button16"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="G"
-                tools:ignore="HardcodedText" />
+                tools:ignore="HardcodedText,DuplicateSpeakableTextCheck" />
 
             <Button
                 android:id="@+id/button17"
-                style="@style/CustomButtonStyle"
+                style="@style/buttonLetter"
                 android:layout_width="48dp"
                 android:layout_height="68dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/button_background_letters"
+                android:background="@drawable/btn_letters"
                 android:text="G"
-                tools:ignore="HardcodedText" />
+                tools:ignore="HardcodedText,TouchTargetSizeCheck,VisualLintBounds" />
         </LinearLayout>
     </LinearLayout>
 
@@ -275,33 +427,27 @@
         <ImageView
             android:id="@+id/successImage"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="200dp"
             android:layout_centerInParent="true"
             android:contentDescription="@string/success"
-            android:src="@drawable/image1"
+            android:src="@drawable/ic_success"
             tools:ignore="MissingConstraints" />
-
-        <TextView
-            android:id="@+id/successText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/successImage"
-            android:layout_centerHorizontal="true"
-            android:text="Success"
-            android:textSize="12pt"
-            tools:ignore="HardcodedText" />
 
         <Button
             android:id="@+id/buttonNext"
+            android:text="Next"
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/successText"
+
+            android:layout_below="@+id/successImage"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="48dp"
-            android:text="Next"
-            tools:ignore="HardcodedText"
-            android:clickable="false" />
+            android:layout_marginTop="20dp"
+
+            android:fontFamily="serif"
+            android:clickable="false"
+            android:background="@drawable/btn_default"
+
+            tools:ignore="HardcodedText" />
     </RelativeLayout>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

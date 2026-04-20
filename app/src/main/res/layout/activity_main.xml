@@ -3,23 +3,364 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+
+    android:id="@+id/chapter"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
+    android:background="@drawable/bg_main"
+
     tools:context="com.example.guessplayer.MainActivity">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/pager"
+
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="470dp"
-        android:layout_marginEnd="50dp"
-        android:layout_marginBottom="25dp"
+        android:layout_height="450dp"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.01"
+        tools:ignore="VisualLintBounds" />
 
+    <ImageButton
+        android:id="@+id/buttonSupport"
+
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+
+        android:background="@drawable/ic_dark_support"
+        android:contentDescription="@string/support"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.05"
+
+        tools:ignore="TouchTargetSizeCheck" />
+
+    <ImageView
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+
+        android:background="@drawable/ic_light_logo"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.24"
+
+        tools:ignore="ImageContrastCheck"/>
+
+    <LinearLayout
+        android:id="@+id/hiddenButtonsContainer"
+
+        android:layout_width="180dp"
+        android:layout_height="60dp"
+        android:layout_above="@id/buttonSupport"
+        android:layout_centerHorizontal="true"
+
+        android:background="@drawable/stl_transparent_10"
+
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:gravity="center"
+
+        app:layout_constraintBottom_toBottomOf="@+id/pager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.11">
+
+        <ImageButton
+            android:id="@+id/buttonSettings"
+            android:contentDescription="@string/settings"
+
+            android:layout_gravity="center_vertical"
+
+            android:layout_width="33dp"
+            android:layout_height="33dp"
+            android:layout_marginStart="5dp"
+
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_light_support_settings"
+
+            tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
+
+        <ImageButton
+            android:id="@+id/buttonTrophyCollection"
+            android:contentDescription="@string/trophyCollection"
+
+            android:layout_gravity="center_vertical"
+
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="5dp"
+
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_light_support_trophies"
+
+            tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
+
+        <ImageButton
+            android:id="@+id/buttonAsk"
+            android:contentDescription="@string/questions"
+
+            android:layout_gravity="center_vertical"
+
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_light_support_ask"
+
+            tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
+
+        <ImageButton
+            android:id="@+id/buttonNews"
+            android:contentDescription="@string/news"
+
+            android:layout_gravity="center_vertical"
+
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="3dp"
+
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_light_support_news"
+
+            tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/balanceTextView"
+
+        android:layout_width="130dp"
+        android:layout_height="29dp"
+
+        android:background="@drawable/stl_transparent_10"
+
+        android:textColor="@color/white"
+        android:textSize="7pt"
+        android:gravity="center_horizontal|center_vertical"
+        android:fontFamily="serif"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.15"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.06"
+        tools:ignore="VisualLintOverlap" />
+
+    <TextView
+        android:id="@+id/userLevelTextView"
+
+        android:layout_width="130dp"
+        android:layout_height="29dp"
+
+        android:background="@drawable/stl_transparent_10"
+
+        android:textColor="@color/white"
+        android:textSize="7pt"
+        android:gravity="center_horizontal|center_vertical"
+        android:fontFamily="serif"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.85"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.06"
+        tools:ignore="VisualLintOverlap" />
+
+    <RelativeLayout
+        android:id="@+id/uniformWindowRelative"
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        android:background="@drawable/stl_transparent_20"
+        android:visibility="gone"
+        android:elevation="10dp"
+
+        android:clickable="true"
+        android:focusable="true">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/settingsCardView"
+            android:layout_width="300dp"
+            android:layout_height="500dp"
+
+            android:layout_centerInParent="true"
+
+            app:cardBackgroundColor="#BFFFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="240dp"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginTop="15dp"
+
+                    android:background="@drawable/stl_text_white"
+                    android:fontFamily="serif"
+                    android:gravity="center"
+                    android:text="@string/settingsWindow"
+                    android:textColor="@color/black"
+
+                    android:textSize="8pt"
+                    tools:ignore="TextSizeCheck" />
+
+                <Button
+                    android:id="@+id/buttonResetProgress"
+                    android:layout_width="170dp"
+                    android:layout_height="27dp"
+
+                    android:layout_marginTop="400dp"
+
+                    android:background="@drawable/btn_letters"
+
+                    android:fontFamily="serif"
+                    android:textSize="6.5pt"
+                    android:text="@string/reset_progress"
+                    android:textColor="@color/black"
+
+                    tools:ignore="TextSizeCheck,TouchTargetSizeCheck" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/trophyCardView"
+            android:layout_width="300dp"
+            android:layout_height="500dp"
+
+            android:layout_centerInParent="true"
+
+            app:cardBackgroundColor="#BFFFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+
+            android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="240dp"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginTop="15dp"
+
+                    android:background="@drawable/stl_text_white"
+                    android:fontFamily="serif"
+                    android:gravity="center"
+                    android:text="@string/trophyCollectionWindow"
+                    android:textColor="@color/black"
+
+                    android:textSize="8pt"
+                    tools:ignore="TextSizeCheck" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/askCardView"
+            android:layout_width="300dp"
+            android:layout_height="500dp"
+
+            android:layout_centerInParent="true"
+
+            app:cardBackgroundColor="#BFFFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+
+            android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="240dp"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginTop="15dp"
+
+                    android:background="@drawable/stl_text_white"
+                    android:fontFamily="serif"
+                    android:gravity="center"
+                    android:text="@string/askWindow"
+                    android:textColor="@color/black"
+
+                    android:textSize="8pt"
+                    tools:ignore="TextSizeCheck" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/newsCardView"
+            android:layout_width="300dp"
+            android:layout_height="500dp"
+
+            android:layout_centerInParent="true"
+
+            app:cardBackgroundColor="#BFFFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+
+            android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="240dp"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginTop="15dp"
+
+                    android:background="@drawable/stl_text_white"
+                    android:fontFamily="serif"
+                    android:gravity="center"
+                    android:text="@string/newsWindow"
+                    android:textColor="@color/black"
+
+                    android:textSize="8pt"
+                    tools:ignore="TextSizeCheck" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

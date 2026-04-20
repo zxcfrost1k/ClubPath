@@ -1,12 +1,13 @@
 sporting manchester_united real_madrid juventus manchester_united al_nasr
 barcelona psg inter_miami
-monaco psg real_madrid
+monaco psg psg real_madrid
 barcelona
 bryne molde rb_salzburg borussia_dortmund manchester_city
 santos barcelona psg al_hilal santos
 flamengo real_madrid
 birmingham_city borussia_dortmund real_madrid
-tottenham bayern_munchen
+tottenham leyton_orient millwall norwich_city leicester_city bayern_munchen
 groningen celtic southampton liverpool
-malmo ajax juventus inter barcelona milan psg manchester_united la_galaxy milan
+villarreal atletico_madrid manchester_city
+malmo ajax juventus inter barcelona milan milan psg manchester_united la_galaxy milan
 liverpool real_madrid

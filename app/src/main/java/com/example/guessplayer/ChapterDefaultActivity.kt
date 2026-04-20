@@ -2,15 +2,25 @@ package com.example.guessplayer
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.DisplayMetrics
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import android.widget.ToggleButton
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.forEach
+import androidx.cardview.widget.CardView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.example.guessplayer.chapter_tools.FootballClub
 import com.example.guessplayer.chapter_tools.FootballClubAdapter
@@ -20,18 +30,31 @@ import kotlin.random.Random
 import kotlin.text.replace
 import kotlin.text.uppercase
 
-open class ChapterDefaultActivity(): AppCompatActivity() {
+
+open class ChapterDefaultActivity: AppCompatActivity() {
     // кнопки
-    lateinit var buttonToNextLvl: Button
-    // кнопка перехода к следующему уровню после успешного ввода
+    lateinit var buttonToNextLevel: Button
+    lateinit var buttonToSelection: ImageButton
+    lateinit var buttonToSelection1: Button
+    lateinit var buttonToSelection2: Button
+    lateinit var buttonToSelection3: Button
+    private lateinit var toggleLoanButton: ToggleButton
+    
+    // текст
+    lateinit var balanceText: TextView
+    lateinit var userLevelText: TextView
 
     // лейауты
     lateinit var successWindow: RelativeLayout // структура окна успешного ввода слова
+    lateinit var selectionWindow: RelativeLayout // структура окна селекции
     lateinit var structureOfLetterButtons: LinearLayout // структура букв-кнопок
     // структура некликабельных кнопок для "визуализации" загаданного слова
     lateinit var structureOfButtonsForVisualization: LinearLayout
     lateinit var structureOfButtonsForInputField: LinearLayout // структура "поля ввода"
     private lateinit var recyclerView: RecyclerView
+
+    // скроллеры
+    private lateinit var smoothScroller: LinearSmoothScroller
 
     // адаптеры
     private lateinit var footballClubAdapter: FootballClubAdapter
@@ -39,15 +62,16 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
     // списки и словари
     private val listOfFreePositionsOnTop = Array(MAX_LETTER_BUTTONS) { 0 }
     private val listOfFreePositionsOnLow = Array(MAX_LETTER_BUTTONS) { 1 }
-    private val listOfLetterButtonsForInputField = ArrayList<Button>()
-
-    val listOfLetterButtons = ArrayList<Button>() // список букв-кнопок
     // список кнопок-букв в "поле ввода"
+    private val listOfLetterButtonsForInputField = ArrayList<Button>()
+    val listOfLetterButtons = ArrayList<Button>() // список букв-кнопок
     var listOfFootballPlayersNames = ArrayList<String>() // список всех имен
-
     lateinit var listOfFootballPlayersClubs: List<List<String>> // список клубов
     lateinit var listOfFootballPlayersTransferYears: List<List<String>> // список дат трансферов
     private lateinit var listOfFootballClub: ArrayList<FootballClub>
+
+    // коллбэки
+    private var selectionBackCallback: OnBackInvokedCallback? = null
 
     // числа
     companion object {
@@ -63,19 +87,24 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         private const val SMALLEST_WIDTH = 21
         private const val SMALLEST_HEIGHT = 45
     }
-    var currentLvl = 0
+    var currentLevel = 0
+    var currentBalance = 0
+    var currentUserLevel = 0
 
-
-    // Инициализация объектов классов
+    // объекты класса
     val rmoc = ResourceMapOfClubs()
     val resourceMapOfClubs = rmoc.resourceMapOfClubs
 
+    // <<<ИНИЦИАЛИЗАТОР>>>
 
     @SuppressLint("MissingInflatedId") // скип проверки на существование всех элементов
     override fun onCreate(savedInstanceState: Bundle?) { // основной метод жизненного цикла окна
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // режим полного покрытия экрана
-        setContentView(R.layout.activity_default_chapter) // установка макета
+
+        hideNavigationBar()
+
+        setContentView(R.layout.activity_default_chapter)
+        window.setBackgroundDrawable(null)
 
         val intent = intent
         val currentChapter =
@@ -88,6 +117,14 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
             intent.getStringExtra("filenameForgetFootballPlayersNames") ?: "null"
         val filenameForGameProgress =
             intent.getStringExtra("filenameForGameProgress") ?: "null"
+
+        smoothScroller = object : LinearSmoothScroller(this) {
+            override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics): Float {
+                return 200f / displayMetrics.densityDpi
+            }
+        }
+
+        enablePredictiveBackGesture()
 
         initializeObjects() // инициализация объектов активности
 
@@ -105,9 +142,17 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
             resizeButton(listOfLetterButtons[i])
         }
 
+        showBalance()
+        showUserLevel()
+
         setupClickListeners() // отслеживание кликов
+        setupSelectionWindowTouchListener()
+        setupLoanFilterButton()
     }
 
+    // <<<ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ИНИЦИАЛИЗАТОРА>>>
+
+    // инициализация ресурсов активности
     fun initializeResources(
         filenameForGetFootballPlayersNames: String,
         filenameForFootballPlayersClubs: String,
@@ -125,54 +170,92 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
             GetInfoAboutPlayer.getFootballPlayersTransferYears(this,
                 filenameForFootballPlayersTransferYears)
 
-        currentLvl =
+        currentLevel =
             GetInfoAboutPlayer.getCurrentLevelFromFile(this,
                 filenameForGameProgress, currentChapter)
+
+        currentBalance = GetInfoAboutPlayer.getBalanceFromFile(this,
+            filenameForGameProgress)
+
+        currentUserLevel = GetInfoAboutPlayer.getUserLevelFromFile(this,
+            filenameForGameProgress)
 
         listOfFootballClub = ArrayList()
         addDataToListOfFootballClub()
 
         footballClubAdapter = FootballClubAdapter(listOfFootballClub)
         recyclerView.adapter = footballClubAdapter
-    }
 
-    fun addDataToListOfFootballClub() {
-        for (i in 0 until listOfFootballPlayersClubs[currentLvl].size) {
-            val drawableId: Int = resourceMapOfClubs[listOfFootballPlayersClubs[currentLvl][i]]!!
-            listOfFootballClub.add(
-                FootballClub(
-                    drawableId,
-                    listOfFootballPlayersTransferYears[currentLvl][i]
-                )
-            )
+        recyclerView.post {
+            smoothScroller.targetPosition = recyclerView.adapter?.itemCount?.minus(1) ?: 0
+            (recyclerView.layoutManager as LinearLayoutManager).startSmoothScroll(smoothScroller)
         }
     }
 
-    fun initializeObjects() { // инициализация объектов активности
+    // инициализация объектов активности
+    fun initializeObjects() {
         recyclerView = findViewById(R.id.recyclerview)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = LinearLayoutManager(this,
             RecyclerView.HORIZONTAL, false)
 
-        val buttonIds = listOf(
+        val buttonLettersIds = listOf(
             R.id.button1, R.id.button2, R.id.button3, R.id.button4, R.id.button5,
             R.id.button6, R.id.button7, R.id.button8, R.id.button9, R.id.button10,
             R.id.button11, R.id.button12, R.id.button13, R.id.button14, R.id.button15,
             R.id.button16, R.id.button17
         )
-        listOfLetterButtons.addAll(buttonIds.map { findViewById(it) })
+        listOfLetterButtons.addAll(buttonLettersIds.map { findViewById(it) })
 
-        buttonToNextLvl = findViewById(R.id.buttonNext)
+        buttonToNextLevel = findViewById(R.id.buttonNext)
+        buttonToSelection = findViewById(R.id.buttonSelection)
+        toggleLoanButton = findViewById(R.id.toggleLoanButton)
+
+        balanceText = findViewById(R.id.balanceTextView)
+        userLevelText = findViewById(R.id.userLevelTextView)
 
         structureOfLetterButtons = findViewById(R.id.linearLayoutLow)
         structureOfButtonsForVisualization = findViewById(R.id.linearLayoutUp)
         structureOfButtonsForInputField = findViewById(R.id.linearLayoutUpTop)
 
         successWindow = findViewById(R.id.successWindowRelative)
+        selectionWindow = findViewById(R.id.selectionWindowRelative)
+
+        buttonToSelection1 = findViewById(R.id.buttonSelection1)
+        buttonToSelection2 = findViewById(R.id.buttonSelection2)
+        buttonToSelection3 = findViewById(R.id.buttonSelection3)
     }
 
+    // заполнение списка с логотипами фут. клубов
+    fun addDataToListOfFootballClub() {
+        for (i in 0 until listOfFootballPlayersClubs[currentLevel].size) {
+            val drawableId: Int = resourceMapOfClubs[listOfFootballPlayersClubs[currentLevel][i]]!!
+            listOfFootballClub.add(
+                FootballClub(
+                    drawableId,
+                    listOfFootballPlayersTransferYears[currentLevel][i]
+                )
+            )
+        }
+    }
+
+    // заполнение списка с логотипами фут. клубов
+    fun addDataToList() {
+        for (i in 0 until listOfFootballPlayersClubs[currentLevel].size) {
+            val drawableId: Int =
+                rmoc.resourceMapOfClubs[listOfFootballPlayersClubs[currentLevel][i]]!!
+            listOfFootballClub.add(
+                FootballClub(
+                    drawableId,
+                    listOfFootballPlayersTransferYears[currentLevel][i]
+                )
+            )
+        }
+    }
+
+    // установка букв-кнопок
     fun setLetterButtons() {
-        createInputField() // заполнение структуры "визуализации"
+        createInputField()
         val allLetters = generateStringForLetterButtons()
 
         repeat(MAX_LETTER_BUTTONS) { i ->
@@ -180,13 +263,14 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         }
     }
 
-    fun createInputField() { // создание кнопки для визуализации "поля ввода"
-        val name = listOfFootballPlayersNames[currentLvl]
+    // создание кнопки для визуализации "поля ввода"
+    fun createInputField() {
+        val name = listOfFootballPlayersNames[currentLevel]
         var width = DEFAULT_WIDTH
         var height = DEFAULT_HEIGHT
         var size = 2
 
-        if (name.length > 9 && name.length < 13) {
+        if (name.length in 10..<13) {
             width = SMALLER_WIDTH
             height = SMALLER_HEIGHT
             size = 1
@@ -212,6 +296,7 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         setupClickListeners()
     }
 
+    // заполнение структуры "визуализации"
     fun createInputButton(indicatorForStyle: Int,
                                   index: Int, width: Int, height: Int, size: Int) {
         val newButton = Button(this).apply {
@@ -225,18 +310,18 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
                 )
             }
             when (indicatorForStyle) {
-                2 -> setBackgroundResource(R.drawable.button_background_input)
+                2 -> setBackgroundResource(R.drawable.stl_transparent_20)
                 0 -> {
                     if (index < listOfFreePositionsOnTop.size) {
                         listOfFreePositionsOnTop[index] = 1
                     }
-                    setBackgroundResource(R.drawable.button_background_input_enter)
+                    setBackgroundResource(R.drawable.btn_input_enter)
                 }
                 else -> {
                     if (index < listOfFreePositionsOnTop.size) {
                         listOfFreePositionsOnTop[index] = 1
                     }
-                    setBackgroundResource(R.drawable.button_background_hyphen)
+                    setBackgroundResource(R.drawable.btn_hyphen)
                 }
             }
         }
@@ -256,14 +341,10 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
             0 -> newButton.textSize = 18.0f
         }
 
-        // создание кнопки-заготовки для "поля ввода"
         createInvisibleButton(width, height, indicatorForStyle)
     }
 
-    fun Int.dpToPx(): Int { // конвертирование dp в px
-        return (this * resources.displayMetrics.density).toInt()
-    }
-
+    // создание кнопки-заготовки для "поля ввода"
     fun createInvisibleButton(width: Int, height: Int, cont: Int) {
         val newButton = Button(this).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -275,8 +356,8 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
                     2.dpToPx(), 2.dpToPx()
                 )
             }
-            setBackgroundResource(R.drawable.button_background_letters)
-            setTextAppearance(R.style.CustomButtonStyle)
+            setBackgroundResource(R.drawable.btn_letters)
+            setTextAppearance(R.style.buttonLetter)
         }
         structureOfButtonsForInputField.addView(newButton)
         listOfLetterButtonsForInputField.add(newButton)
@@ -293,8 +374,9 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         }
     }
 
+    // генерация строки из рандомных букв
     fun generateStringForLetterButtons(): String {
-        val neededLetters = listOfFootballPlayersNames[currentLvl]
+        val neededLetters = listOfFootballPlayersNames[currentLevel]
             .replace(" ", "")
             .replace("-", "")
             .uppercase()
@@ -307,6 +389,7 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         return allLetters
     }
 
+    // перетасовка строки
     fun shuffleString(input: String): String {
         val chars = input.toMutableList()
         for (i in chars.size - 1 downTo 1) {
@@ -319,6 +402,7 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         return chars.joinToString("")
     }
 
+    // генерация рандомных букв с учетом частности повторения
     fun generateRandomLettersWithFrequency(count: Int,
                                            excludeLetters: String = ""): String {
         if (count <= 0) return ""
@@ -350,7 +434,7 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         // выбор случайных букв
         repeat(count) {
             if (weightedLetters.isNotEmpty()) {
-                val randomChar = weightedLetters.removeAt(0) // удаление буквы после выбора
+                val randomChar = weightedLetters.removeAt(0)
                 letters.append(randomChar)
             }
         }
@@ -358,6 +442,7 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         return letters.toString()
     }
 
+    // изменение размера кнопок-букв
     fun resizeButton(button: Button) {
         button.layoutParams = LinearLayout.LayoutParams(
             DEFAULT_WIDTH.dpToPx(), DEFAULT_HEIGHT.dpToPx()
@@ -369,7 +454,38 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         }
     }
 
-    fun setupClickListeners() { // обработчики нажатий
+    // <<<SETUPS>>>
+
+    // настройка кнопки-переключателя
+    private fun setupLoanFilterButton() {
+        footballClubAdapter.filterLoans(false)
+
+        toggleLoanButton.setOnCheckedChangeListener { _, isChecked ->
+            footballClubAdapter.filterLoans(isChecked)
+
+            if (isChecked) {
+                recyclerView.post {
+                    val lastPosition = footballClubAdapter.itemCount - 1
+                    if (lastPosition >= 0) {
+                        smoothScroller.targetPosition = lastPosition
+                        (recyclerView.layoutManager as LinearLayoutManager).startSmoothScroll(smoothScroller)
+                    }
+                }
+            } else {
+                val hiddenCount = footballClubAdapter.getHiddenCount()
+                if (hiddenCount > 0) {
+                    Toast.makeText(
+                        this@ChapterDefaultActivity,
+                        "Hidden $hiddenCount loan transfers",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    // обработчики нажатий
+    fun setupClickListeners() {
         repeat(MAX_LETTER_BUTTONS) { i ->
             listOfLetterButtons[i].setOnClickListener {
                 handleLetterButtonClick(listOfLetterButtons[i], i) }
@@ -377,17 +493,19 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
 
         repeat(listOfLetterButtonsForInputField.size) { i ->
                 listOfLetterButtonsForInputField[i].setOnClickListener {
-                    handleLetterButtonClick(listOfLetterButtonsForInputField[i], i) }
+                    handleLetterButtonClick(listOfLetterButtonsForInputField[i], i)
+                }
         }
 
-        buttonToNextLvl.setOnClickListener { hideRL() }
+        buttonToNextLevel.setOnClickListener { hideRL() }
     }
 
-    fun handleLetterButtonClick(button: Button, index: Int) { // клик на букву-кнопку
+    // обработчик нажатия на букву-кнопку
+    fun handleLetterButtonClick(button: Button, index: Int) {
         // проверка на клик (из структуры букв-кнопок или из структуры "поля ввода"?)
         if (listOfLetterButtons.contains(button)) {
             // проверка на загруженность "поля ввода"
-            if (listOfFootballPlayersNames[currentLvl].length > listOfFreePositionsOnTop.sum()) {
+            if (listOfFootballPlayersNames[currentLevel].length > listOfFreePositionsOnTop.sum()) {
                 moveButtonToUp(button, index) // "перемещает" букву-кнопку в "поле ввода"
             }
         }
@@ -396,17 +514,51 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         }
     }
 
+    // слушатель окна селекции
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupSelectionWindowTouchListener() {
+        selectionWindow.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                val x = event.rawX.toInt()
+                val y = event.rawY.toInt()
+
+                val cardView = selectionWindow.findViewById<CardView>(R.id.selectionCardView)
+
+                val location = IntArray(2)
+                cardView.getLocationOnScreen(location)
+                val viewX = location[0]
+                val viewY = location[1]
+
+                val isInside = x >= viewX && x <= viewX + cardView.width &&
+                        y >= viewY && y <= viewY + cardView.height
+
+                if (!isInside) {
+                    hideSelectionWindow()
+                    return@setOnTouchListener true
+                }
+            }
+            false
+        }
+    }
+
+    // "перемещает" букву-кнопку в "поле ввода"
     fun moveButtonToUp(button: Button, index: Int) {
         val checkIn: Int = checkFreePosition()
         if (checkIn != -1) {
             button.visibility = View.INVISIBLE
             button.isClickable = false
 
-            val buttonUp = structureOfButtonsForInputField.getChildAt(checkIn) as Button
-            buttonUp.text = button.text
-            buttonUp.isClickable = true
+            val buttonUp = structureOfButtonsForInputField.getChildAt(checkIn)
+            if (buttonUp is Button) {
+                buttonUp.text = button.text
+                buttonUp.isClickable = true
+                buttonUp.visibility = View.VISIBLE
+            }
 
-            buttonUp.visibility = View.VISIBLE
+            val buttonUnderUp = structureOfButtonsForVisualization.getChildAt(checkIn)
+            if (buttonUnderUp is Button) {
+                buttonUnderUp.visibility = View.INVISIBLE
+            }
 
             // занимает позицию
             if (checkIn < listOfFreePositionsOnTop.size) {
@@ -417,19 +569,28 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
             }
 
             if (checkPositions() != -1) {
+                currentBalance += 15
+                if ((currentLevel + 1) % 3 == 0) {
+                    currentUserLevel += 1
+                }
+
                 showRL()
+                showBalance()
+                showUserLevel()
 
                 val currentChapter = intent.getIntExtra("currentChapter", 1)
                 GetInfoAboutPlayer.updateProgressInFile(this,
-                    currentLvl + 1, currentChapter)
+                    currentLevel + 1, currentChapter,
+                    currentBalance, currentUserLevel)
             }
         }
     }
 
-    fun moveButtonToLow(button: Button) { // "перемещает" букву-кнопку из "поля ввода"
+    // "перемещает" букву-кнопку из "поля ввода"
+    fun moveButtonToLow(button: Button) {
         button.visibility = View.INVISIBLE
 
-        var buttonLow = button
+        var buttonLow: Button? = button
         for (i in 0 until MAX_LETTER_BUTTONS) {
             if ((button.text == listOfLetterButtons[i].text) &&
                 (listOfFreePositionsOnLow[i] == 0)) {
@@ -441,17 +602,26 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         }
 
         button.text = ""
-        buttonLow.visibility = View.VISIBLE
-        buttonLow.isClickable = true
+        buttonLow?.apply {
+            visibility = View.VISIBLE
+            isClickable = true
+        }
 
-        // освобождает позицию
         val position = structureOfButtonsForInputField.indexOfChild(button)
         if (position != -1) {
             listOfFreePositionsOnTop[position] = 0
         }
+
+        val buttonUnderUp = structureOfButtonsForVisualization.getChildAt(position)
+        if (buttonUnderUp is Button) {
+            buttonUnderUp.visibility = View.VISIBLE
+        }
     }
 
-    fun checkFreePosition(): Int { // возвращает ближайшую к началу свободную позицию
+    // <<<СИСТЕМНЫЕ ФУНКЦИИ>>>
+
+    // возвращает ближайшую к началу свободную позицию
+    fun checkFreePosition(): Int {
         repeat(listOfFreePositionsOnTop.size) { i ->
             if (listOfFreePositionsOnTop[i] == 0) {
                 return i
@@ -460,27 +630,88 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         return -1
     }
 
-    fun checkPositions(): Int { // проверка на правильный ввод
-        val nowName = listOfFootballPlayersNames[currentLvl].uppercase()
+    // проверка на правильный ввод
+    fun checkPositions(): Int {
+        val nowName = listOfFootballPlayersNames[currentLevel].uppercase()
 
-        repeat(nowName.length) { i ->
-            val button = structureOfButtonsForInputField.getChildAt(i) as Button
-
-            if (button.text != "—" && button.text != " ") {
-                if (button.text != nowName[i].toString()) {
-                    return -1
+        for (i in 0 until nowName.length) {
+            val child = structureOfButtonsForInputField.getChildAt(i)
+            if (child is Button) {
+                if (child.text != "—" && child.text != " ") {
+                    if (child.text != nowName[i].toString()) {
+                        return -1
+                    }
                 }
             }
         }
         return 1
     }
 
-    fun showRL() { // переход в видимый режим окна успешного ввода
-        buttonToNextLvl.isClickable = true
-        blockAllButtons()
+    // очистка окна активности
+    fun clearWindow() {
+        structureOfButtonsForVisualization.removeAllViews()
+
+        for (i in 0 until structureOfButtonsForInputField.childCount) {
+            val child = structureOfButtonsForInputField.getChildAt(i)
+            if (child is Button) {
+                moveButtonToLow(child)
+            }
+        }
+
+        structureOfButtonsForInputField.removeAllViews()
+    }
+
+    // переход букв-кнопок в некликабельный режим
+    fun blockLetterButtons() {
+        repeat(MAX_LETTER_BUTTONS) { i ->
+            if (i < listOfLetterButtons.size) {
+                listOfLetterButtons[i].isClickable = false
+            }
+        }
+
+        for (i in 0 until structureOfButtonsForInputField.childCount) {
+            val button = structureOfButtonsForInputField.getChildAt(i)
+            if (button is Button) {
+                button.isClickable = false
+            }
+        }
+    }
+
+    // переход букв-кнопок в кликабельный режим
+    fun unblockAllButtons() {
+        repeat(MAX_LETTER_BUTTONS) { i ->
+            if (i < listOfLetterButtons.size) {
+                listOfLetterButtons[i].isClickable = true
+            }
+        }
+
+        for (i in 0 until structureOfButtonsForInputField.childCount) {
+            val button = structureOfButtonsForInputField.getChildAt(i)
+            if (button is Button) {
+                button.isClickable = true
+            }
+        }
+    }
+
+    // конвертирование dp в px
+    fun Int.dpToPx(): Int {
+        return (this * resources.displayMetrics.density).toInt()
+    }
+
+    // <<<АНИМАЦИИ>>>
+
+    // переход в видимый режим окна успешного ввода
+    fun showRL() {
+        if (currentLevel >= MAX_LEVEL - 1) {
+            endOfTheChapter()
+            return
+        }
+
+        buttonToNextLevel.isClickable = true
+        blockLetterButtons()
 
         successWindow.visibility = View.VISIBLE
-        successWindow.setAlpha(0f)
+        successWindow.alpha = 0f
 
         successWindow.animate() // анимирование появление
             .alpha(1f)
@@ -489,55 +720,119 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
             .start()
     }
 
-    private fun hideRL() { // переход в невидимый режим окна успешного ввода
-        if (currentLvl == MAX_LEVEL) {
+    // переход в невидимый режим окна успешного ввода
+    private fun hideRL() {
+        if (currentLevel >= MAX_LEVEL) {
             endOfTheChapter()
             return
         }
 
-        buttonToNextLvl.isClickable = false
+        buttonToNextLevel.isClickable = false
         unblockAllButtons()
 
-        currentLvl++
+        currentLevel++
         clearWindow()
         setLetterButtons()
         reCreate()
 
-        successWindow.animate() // анимирование исчезновение
+        successWindow.animate() // анимирование исчезновения
             .alpha(0f)
             .setDuration(300)
             .withEndAction {
-                successWindow.visibility = View.GONE
-                successWindow.animate().setListener(null)
+                successWindow.apply {
+                    visibility = View.GONE
+                    alpha = 1f
+                }
             }
             .start()
     }
 
-    fun clearWindow() {
-        structureOfButtonsForVisualization.removeAllViews()
-        structureOfButtonsForInputField.forEach { moveButtonToLow(it as Button) }
-        structureOfButtonsForInputField.removeAllViews()
-    }
+    // появление окна селекции
+    fun showSelectionWindow(view: View) {
+        selectionWindow.apply {
+            visibility = View.VISIBLE
+            alpha = 0f
 
-    fun blockAllButtons() { // переход букв-кнопок в некликабельный режим
-        repeat(MAX_LETTER_BUTTONS) { i ->
-            listOfLetterButtons[i].isClickable = false
+            animate()
+                .alpha(1f)
+                .setDuration(300)
+                .withStartAction {
+                    buttonToSelection.isClickable = false
+                    blockLetterButtons()
+                }
+                .start()
         }
     }
 
-    fun unblockAllButtons() { // переход букв-кнопок в кликабельный режим
-        repeat(MAX_LETTER_BUTTONS) { i ->
-            listOfLetterButtons[i].isClickable = true
+    // скрытие окна селекции
+    fun hideSelectionWindow() {
+        selectionWindow.animate()
+            .alpha(0f)
+            .setDuration(300)
+            .withEndAction {
+                selectionWindow.apply {
+                    visibility = View.GONE
+                    alpha = 1f
+                    buttonToSelection.isClickable = true
+                    unblockAllButtons()
+                }
+            }
+            .start()
+    }
+
+    private fun enablePredictiveBackGesture() {
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(
+            OnBackInvokedDispatcher.PRIORITY_DEFAULT
+        ) {
+            // Анимация при свайпе назад
+            finishAfterTransition()
         }
     }
 
+    // <<<ОТОБРАЖЕНИЕ И ВНЕШНИЙ ВИД ОТДЕЛЬНЫХ ЭЛЕМЕНТОВ>>>
+
+    // настройка нав. панели
+    private fun hideNavigationBar() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+
+        controller.hide(WindowInsetsCompat.Type.navigationBars())
+        controller.show(WindowInsetsCompat.Type.statusBars())
+        
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    }
+
+    // отображение баланса
+    fun showBalance() {
+        balanceText.text = resources.getString(R.string.balance_format, currentBalance)
+    }
+
+    // отображение уровня игрока
+    fun showUserLevel() {
+        userLevelText.text = resources.getString(R.string.user_level_format, currentUserLevel)
+    }
+
+    // <<<СЕЛЕКЦИЯ>>>
+
+    fun selection1(view: View) {
+    }
+
+    fun selection2(view: View) {
+    }
+
+    fun selection3(view: View) {
+    }
+
+    // <<<КОНЕЦ ГЛАВЫ>>>
     fun endOfTheChapter() {
-        val message = "chapter passed"
+        val message = "Chapter passed"
 
         Toast.makeText(
             this,
             message,
-            Toast.LENGTH_SHORT // или LENGTH_LONG
+            Toast.LENGTH_SHORT
         ).show()
 
         findViewById<View>(android.R.id.content).postDelayed({
@@ -545,24 +840,28 @@ open class ChapterDefaultActivity(): AppCompatActivity() {
         }, 500)
     }
 
+    // <<<РЕСТАРТЕР>>>
     fun reCreate() {
         listOfFootballClub = ArrayList()
         addDataToList()
 
         footballClubAdapter = FootballClubAdapter(listOfFootballClub)
         recyclerView.adapter = footballClubAdapter
+        footballClubAdapter.filterLoans(false)
+        toggleLoanButton.isChecked = false
+
+        recyclerView.post {
+            smoothScroller.targetPosition = recyclerView.adapter?.itemCount?.minus(1) ?: 0
+            (recyclerView.layoutManager as LinearLayoutManager).startSmoothScroll(smoothScroller)
+        }
     }
 
-    fun addDataToList() {
-        for (i in 0 until listOfFootballPlayersClubs[currentLvl].size) {
-            val drawableId: Int =
-                rmoc.resourceMapOfClubs[listOfFootballPlayersClubs[currentLvl][i]]!!
-            listOfFootballClub.add(
-                FootballClub(
-                    drawableId,
-                    listOfFootballPlayersTransferYears[currentLvl][i]
-                )
-            )
+    // <<<ДЕСТРУКТОР>>>
+
+    override fun onDestroy() {
+        super.onDestroy()
+        selectionBackCallback?.let {
+            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(it)
         }
     }
 }

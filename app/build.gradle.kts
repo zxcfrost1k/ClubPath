@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.guessplayer"
-        minSdk = 24
+        minSdk = 34
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -35,7 +35,7 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures{
+    buildFeatures {
         dataBinding = true
         viewBinding = true
     }
@@ -49,6 +49,15 @@ android {
         // warningsAsErrors = false
         // abortOnError = false
     }
+    sourceSets {
+        sourceSets {
+            getByName("main") {
+                res.srcDirs(
+                    "src/main/image_fragments"
+                )
+            }
+        }
+    }
 }
 
 dependencies {
@@ -59,6 +68,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.viewpager2)
     implementation(libs.filament.android)
+    //noinspection UseTomlInstead
+    implementation("androidx.cardview:cardview:1.0.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

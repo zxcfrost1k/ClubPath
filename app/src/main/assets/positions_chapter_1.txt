@@ -1,0 +1,13 @@
+lw
+rw
+str
+rw
+str
+lw
+lw
+cam
+str
+cb
+cdm
+str
+rb

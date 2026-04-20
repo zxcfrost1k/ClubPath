@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="90dp"
+    android:layout_margin="6.5dp"
+    android:background="@drawable/stl_transparent_35">
+
+    <ImageView
+        android:id="@+id/imageview"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="3dp"
+        android:src="@drawable/fc_milan"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:fontFamily="serif"
+        android:text="2002-2003"
+        android:textColor="@color/white"
+        android:textSize="6pt"
+        app:layout_constraintEnd_toEndOf="@+id/imageview"
+        app:layout_constraintStart_toStartOf="@+id/imageview"
+        app:layout_constraintTop_toBottomOf="@+id/imageview"
+        tools:ignore="HardcodedText,TextSizeCheck,TextContrastCheck" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,19 +6,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/butOfChap2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Chapter II"
-        android:textSize="10pt"
-        android:onClick="goToChapter2"
+    <ImageView
+        android:layout_width="427dp"
+        android:layout_height="427dp"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+
+        android:background="@drawable/img_fragment2"
+
+        tools:ignore="VisualLintBounds" />
+
+    <Button
+        android:id="@+id/butOfChap2"
+
+        android:layout_width="220dp"
+        android:layout_height="48dp"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8">
-    </Button>
+        app:layout_constraintVertical_bias="0.8"
+
+        android:background="@drawable/stl_transparent_35"
+
+        android:text="@string/chapter2"
+        android:textSize="10pt"
+        android:textColor="@color/white"
+        android:fontFamily="serif"
+
+        android:onClick="goToChapter2"
+
+        tools:ignore="TextSizeCheck"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
