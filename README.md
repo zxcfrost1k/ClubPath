@@ -1,5 +1,5 @@
 <h1>
-  Guess the football player by career
+  ClubPath — Guess the Football Player by Career
 </h1>
 
 <div>
